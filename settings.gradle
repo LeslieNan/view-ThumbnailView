@@ -1,0 +1,3 @@
+include ':thumbnailview'
+include ':app'
+rootProject.name = "ThumbnailView"
