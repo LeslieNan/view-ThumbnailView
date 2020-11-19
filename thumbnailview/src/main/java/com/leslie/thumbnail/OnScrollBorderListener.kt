@@ -6,7 +6,7 @@ package com.leslie.thumbnail
  * PS:
  */
 interface OnScrollBorderListener {
-    fun onScrollBorder(start: Float, end: Float): Array<String?>?
+    fun onScrollBorder(start: Float, end: Float): Array<String>
 
-    fun onScrollStateChange()
+    fun onScrolled()
 }

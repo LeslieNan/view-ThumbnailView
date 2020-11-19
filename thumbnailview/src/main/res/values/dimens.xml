@@ -5,7 +5,7 @@
     <dimen name="scrollBarWidth">10dp</dimen>
     <dimen name="textRectHeight">20dp</dimen>
     <dimen name="textRectWidth">30dp</dimen>
-    <dimen name="downTipsWidth">5dp</dimen>
-    <dimen name="downTipsHeight">3dp</dimen>
+    <dimen name="downTipsWidth">8dp</dimen>
+    <dimen name="downTipsHeight">8dp</dimen>
 
 </resources>

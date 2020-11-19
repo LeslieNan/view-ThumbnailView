@@ -17,9 +17,16 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <com.leslie.thumbnail.ThumbnailView
+        android:id="@+id/tnv_main"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="250dp"
         android:layout_marginStart="30dp"
+        android:layout_marginEnd="30dp"
         />
+
+    <ImageView
+        android:id="@+id/iv_mian"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
 
 </LinearLayout>
