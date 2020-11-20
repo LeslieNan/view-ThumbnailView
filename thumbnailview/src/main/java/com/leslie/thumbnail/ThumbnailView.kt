@@ -1,7 +1,11 @@
 package com.leslie.thumbnail
 
 import android.content.Context
-import android.graphics.*
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.RectF
+import android.graphics.drawable.LayerDrawable
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
@@ -17,17 +21,22 @@ import com.leslie.thumbnail.util.DisplayUtil
 class ThumbnailView : View {
 
     constructor(context: Context?) : super(context) {
-        init()
+        init(null)
     }
 
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs) {
-        init()
+        init(attrs)
     }
 
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int)
             : super(context, attrs, defStyleAttr) {
-        init()
+        init(attrs)
     }
+
+    private var tipsBgColor: Int = 0
+    private var tipsTextColor: Int = 0
+    private var tipsTextSize: Float = 0f
+    private var thumbnailColor: Int = 0
 
     private var scrollChange = false
     private var mWidth = 0f
@@ -38,16 +47,20 @@ class ThumbnailView : View {
     private var mTipsWidth = 0f//文字区域小箭头宽度
     private var mTipsHeight = 0f//文字区域小箭头高度
     private val mPaint: Paint = Paint()
+    private val mShadowPaint: Paint = Paint()
     private val mTextPaint: Paint = Paint()
+    private val mTipsBgPaint: Paint = Paint()
 
     private val rectF: RectF = RectF() //左边拖动条的范围
-    private val rectF2: RectF = RectF() //右边拖动条的范围
+    private val rectF2: RectF = RectF()//右边拖动条的范围
     private val rectF3: RectF = RectF()//左边阴影区域
     private val rectF4: RectF = RectF()//右边阴影区域
-    private val rectF5: RectF = RectF()//左边的时间提示器
-    private val rectF6: RectF = RectF()//右边的时间提示器
+    private val rectF5: RectF = RectF()//左边的文字区域
+    private val rectF6: RectF = RectF()//右边的文字区域
     private val rectF7: RectF = RectF()//左边的向下箭头
     private val rectF8: RectF = RectF()//右边的向下箭头
+    private val rectF9: RectF = RectF()//左边tips上的小矩形
+    private val rectF10: RectF = RectF()//右边tips上的小矩形
     private var rectWidth = 0f //拖动条宽度
 
     private lateinit var bitmapLeft: Bitmap
@@ -63,14 +76,28 @@ class ThumbnailView : View {
     private var paintStrokeWidth = 0f//两条横线宽度
     private var tipsText: Array<String> = arrayOf("", "")
 
-    private fun init() {
-        mPaint.isAntiAlias = true
-        paintStrokeWidth = resources.getDimension(R.dimen.paintStrokeWidth)
-        mPaint.strokeWidth = paintStrokeWidth
+    private fun init(attrs: AttributeSet?) {
+        if (attrs != null) {
+            readAttrs(attrs)
+        } else {
+            thumbnailColor = context.getColor(R.color.thumbnailColor)
+            tipsBgColor = context.getColor(R.color.thumbnailColor)
+            tipsTextColor = context.getColor(R.color.paintTextColor)
+            tipsTextSize = resources.getDimension(R.dimen.paintTextSize)
+        }
 
-        mTextPaint.textSize = resources.getDimension(R.dimen.paintTextSize)
-        mTextPaint.color = context.getColor(R.color.paintTextColor)
+        paintStrokeWidth = resources.getDimension(R.dimen.paintStrokeWidth)
+        mPaint.isAntiAlias = true
+        mPaint.strokeWidth = paintStrokeWidth
+        mPaint.color = thumbnailColor
+
+        mShadowPaint.color = context.getColor(R.color.shadowColor)
+
+        mTextPaint.textSize = tipsTextSize
+        mTextPaint.color = tipsTextColor
         mTextPaint.textAlign = Paint.Align.CENTER
+
+        mTipsBgPaint.color = tipsBgColor
 
         rectWidth = resources.getDimension(R.dimen.scrollBarWidth)
         mTextBgHeight = resources.getDimension(R.dimen.textRectHeight)//需要根据xml传来
@@ -82,37 +109,58 @@ class ThumbnailView : View {
     }
 
     /**
+     * 获取xml中数据
+     */
+    private fun readAttrs(attrs: AttributeSet) {
+        val typedArray = context.obtainStyledAttributes(attrs, R.styleable.ThumbnailView)
+        thumbnailColor = typedArray.getColor(
+            R.styleable.ThumbnailView_thumbnailColor,
+            context.getColor(R.color.thumbnailColor)
+        )
+        tipsTextSize = typedArray.getDimension(
+            R.styleable.ThumbnailView_tipsTextSize,
+            resources.getDimension(R.dimen.paintTextSize)
+        )
+        tipsTextColor = typedArray.getColor(
+            R.styleable.ThumbnailView_tipsTextColor,
+            context.getColor(R.color.paintTextColor)
+        )
+        tipsBgColor = typedArray.getColor(
+            R.styleable.ThumbnailView_tipsColor,
+            context.getColor(R.color.white)
+        )
+        typedArray.recycle()
+    }
+
+    /**
      * 获取根据颜色，大小生成bitmap
      */
     private fun initBitmap() {
-        bitmapLeft = DisplayUtil.vectorToBitmap(
-            context, R.drawable.icon_scroll_bar_left,
-            context.resources.getDimension(R.dimen.scrollBarWidth).toInt(),
-            mHeight.toInt()
+        bitmapLeft = DisplayUtil.drawableToBitmap(
+            DisplayUtil.drawableColoring(
+                context.getDrawable(R.drawable.icon_scroll_bar_left) as LayerDrawable,
+                thumbnailColor
+            ),
+            context.resources.getDimension(R.dimen.scrollBarWidth).toInt(), mHeight.toInt()
         )
-        bitmapRight = DisplayUtil.vectorToBitmap(
-            context, R.drawable.icon_scroll_bar_right,
-            context.resources.getDimension(R.dimen.scrollBarWidth).toInt(),
-            mHeight.toInt()
+        bitmapRight = DisplayUtil.drawableToBitmap(
+            DisplayUtil.drawableColoring(
+                context.getDrawable(R.drawable.icon_scroll_bar_right) as LayerDrawable,
+                thumbnailColor
+            ),
+            context.resources.getDimension(R.dimen.scrollBarWidth).toInt(), mHeight.toInt()
         )
-        bitmapTipsBg = DisplayUtil.vectorToBitmap(
-            context, R.drawable.bg_pop,
+        bitmapTipsBg = DisplayUtil.drawableToBitmap(
+            DisplayUtil.drawableColoring(context.getDrawable(R.drawable.bg_pop), tipsBgColor),
             mTextBgHeight.toInt(), mTextBgHeight.toInt()
         )
-        bitmapDownTips = DisplayUtil.vectorToBitmap(
-            context, R.drawable.bg_drop_down,
+        bitmapDownTips = DisplayUtil.drawableToBitmap(
+            DisplayUtil.drawableColoring(
+                context.getDrawable(R.drawable.bg_drop_down),
+                tipsBgColor
+            ),
             mTipsWidth.toInt(), mTipsHeight.toInt()
         )
-    }
-
-
-    private fun readAttrs(attrs: AttributeSet?) {
-        //获取xml中数据
-        val typedArray = context.obtainStyledAttributes(attrs, R.styleable.ThumbnailView)
-        val tipsTextSize = typedArray.getDimension(R.styleable.ThumbnailView_tipsTextSize, 12f)
-        //        name = typedArray.getString(R.styleable.LocationViewWithAttrs_locationName);
-//        address = typedArray.getString(R.styleable.LocationViewWithAttrs_locationDesc);
-        typedArray.recycle()
     }
 
     /**
@@ -267,7 +315,7 @@ class ThumbnailView : View {
                 scrollLeft = false
                 scrollRight = false
                 if (scrollChange && onScrollBorderListener != null) {
-                    onScrollBorderListener?.onScrolled()
+                    onScrollBorderListener?.onScrollEnd()
                 }
                 scrollChange = false
             }
@@ -276,12 +324,11 @@ class ThumbnailView : View {
     }
 
     override fun onDraw(canvas: Canvas) {
-        mPaint.color = context.getColor(R.color.thumbnailColor)
         //左边的拖动条
         canvas.drawBitmap(bitmapLeft, null, rectF, mPaint)
         //右边的拖动条
         canvas.drawBitmap(bitmapRight, null, rectF2, mPaint)
-        //顶部和底部的两条红线
+        //顶部和底部的两条横线
         canvas.drawLine(
             rectF.left + paintStrokeWidth,
             rectF.top + paintStrokeWidth / 2,
@@ -296,37 +343,42 @@ class ThumbnailView : View {
             mHeight - paintStrokeWidth / 2,
             mPaint
         )
-        mPaint.color = context.getColor(R.color.shadowColor)
         //左边的阴影
         rectF3.left = 0f
         rectF3.top = rectF.top + paintStrokeWidth
         rectF3.right = rectF.left
         rectF3.bottom = mHeight - paintStrokeWidth
-        canvas.drawRect(rectF3, mPaint)
+        canvas.drawRect(rectF3, mShadowPaint)
         //右边的阴影
         rectF4.left = rectF2.right
         rectF4.top = rectF2.top + paintStrokeWidth
         rectF4.right = mWidth
         rectF4.bottom = mHeight - paintStrokeWidth
-        canvas.drawRect(rectF4, mPaint)
+        canvas.drawRect(rectF4, mShadowPaint)
 
         //左边文字背景区域
         rectF5.left = if ((rectF.left - mTextBgWidth / 2) > 0) rectF.left - mTextBgWidth / 2 else 0F
         rectF5.right = rectF5.left + mTextBgWidth
         rectF5.bottom = rectF.top - mTipsHeight
         rectF5.top = 0f
-        canvas.drawBitmap(bitmapTipsBg, null, rectF5, mPaint)
+        canvas.drawBitmap(bitmapTipsBg, null, rectF5, mTipsBgPaint)
         //左边向下箭头
         rectF7.left = (rectF.left - mTextBgWidth / 2) + mTextBgWidth / 2 - mTipsWidth / 2
         rectF7.top = rectF5.bottom
         rectF7.right = rectF7.left + mTipsWidth
         rectF7.bottom = rectF.top
-        canvas.drawBitmap(bitmapDownTips, null, rectF7, mPaint)
+        canvas.drawBitmap(bitmapDownTips, null, rectF7, mTipsBgPaint)
+        //左边箭头上的小矩形
+        rectF9.left = rectF7.left
+        rectF9.right = rectF7.right
+        rectF9.bottom = rectF7.top
+        rectF9.top = rectF7.top - mTipsWidth
+        canvas.drawRect(rectF9, mTipsBgPaint)
         //左边文字
         canvas.drawText(
             tipsText[0],
             rectF5.left + mTextBgWidth / 2,
-            rectF5.top + mTextBgHeight / 2,
+            rectF5.top + tipsTextSize,
             mTextPaint
         )
 
@@ -336,18 +388,24 @@ class ThumbnailView : View {
         rectF6.left = rectF6.right - mTextBgWidth
         rectF6.bottom = rectF2.top - mTipsHeight
         rectF6.top = 0f
-        canvas.drawBitmap(bitmapTipsBg, null, rectF6, mPaint)
+        canvas.drawBitmap(bitmapTipsBg, null, rectF6, mTipsBgPaint)
         //右边向下箭头
         rectF8.left = rectF2.right - mTipsWidth / 2
         rectF8.top = rectF6.bottom
         rectF8.right = rectF8.left + mTipsWidth
         rectF8.bottom = rectF2.top
-        canvas.drawBitmap(bitmapDownTips, null, rectF8, mPaint)
+        canvas.drawBitmap(bitmapDownTips, null, rectF8, mTipsBgPaint)
+        //右边箭头上的小矩形
+        rectF10.left = rectF8.left
+        rectF10.right = rectF8.right
+        rectF10.bottom = rectF8.top
+        rectF10.top = rectF8.top - mTipsWidth
+        canvas.drawRect(rectF10, mTipsBgPaint)
         //右边文字
         canvas.drawText(
             tipsText[1],
             rectF6.left + mTextBgWidth / 2,
-            rectF6.top + mTextBgHeight / 2,
+            rectF6.top + tipsTextSize,
             mTextPaint
         )
     }

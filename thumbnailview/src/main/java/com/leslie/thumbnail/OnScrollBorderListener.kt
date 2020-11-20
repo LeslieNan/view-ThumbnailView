@@ -8,5 +8,5 @@ package com.leslie.thumbnail
 interface OnScrollBorderListener {
     fun onScrollBorder(start: Float, end: Float): Array<String>
 
-    fun onScrolled()
+    fun onScrollEnd()
 }

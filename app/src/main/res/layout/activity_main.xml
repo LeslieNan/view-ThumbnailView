@@ -7,26 +7,26 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <com.leslie.thumbnail.ThumbnailView
         android:id="@+id/tnv_main"
         android:layout_width="match_parent"
         android:layout_height="250dp"
         android:layout_marginStart="30dp"
+        app:thumbnailColor="#f39898"
+        app:tipsColor="#f31212"
+        app:tipsTextColor="@color/white"
+        app:tipsTextSize="15sp"
         android:layout_marginEnd="30dp"
-        />
+        android:layout_marginTop="20dp"/>
 
     <ImageView
         android:id="@+id/iv_mian"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:layout_width="20dp"
+        android:layout_height="200dp" />
+
+    <TextView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:background="@color/black" />
 
 </LinearLayout>
