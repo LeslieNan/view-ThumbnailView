@@ -123,11 +123,11 @@ class ThumbnailView : View {
         )
         tipsTextColor = typedArray.getColor(
             R.styleable.ThumbnailView_tipsTextColor,
-            context.getColor(R.color.paintTextColor)
+            context.getColor(R.color.white)
         )
         tipsBgColor = typedArray.getColor(
             R.styleable.ThumbnailView_tipsColor,
-            context.getColor(R.color.white)
+            context.getColor(R.color.thumbnailColor)
         )
         typedArray.recycle()
     }
@@ -362,6 +362,8 @@ class ThumbnailView : View {
         rectF5.bottom = rectF.top - mTipsHeight
         rectF5.top = 0f
         canvas.drawBitmap(bitmapTipsBg, null, rectF5, mTipsBgPaint)
+        Log.d("测试","颜色"+mTipsBgPaint.color.toString())
+        Log.d("测试","颜色"+mPaint.color.toString())
         //左边向下箭头
         rectF7.left = (rectF.left - mTextBgWidth / 2) + mTextBgWidth / 2 - mTipsWidth / 2
         rectF7.top = rectF5.bottom

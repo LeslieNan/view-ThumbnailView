@@ -5,28 +5,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@color/black"
     tools:context=".MainActivity">
 
     <com.leslie.thumbnail.ThumbnailView
         android:id="@+id/tnv_main"
         android:layout_width="match_parent"
-        android:layout_height="250dp"
+        android:layout_height="80dp"
         android:layout_marginStart="30dp"
-        app:thumbnailColor="#f39898"
-        app:tipsColor="#f31212"
-        app:tipsTextColor="@color/white"
-        app:tipsTextSize="15sp"
-        android:layout_marginEnd="30dp"
-        android:layout_marginTop="20dp"/>
-
-    <ImageView
-        android:id="@+id/iv_mian"
-        android:layout_width="20dp"
-        android:layout_height="200dp" />
-
-    <TextView
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:background="@color/black" />
+        android:layout_margin="24dp" />
 
 </LinearLayout>
