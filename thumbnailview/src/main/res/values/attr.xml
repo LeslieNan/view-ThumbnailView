@@ -5,6 +5,8 @@
         <attr name="tipsTextSize" format="dimension" />
         <attr name="tipsTextColor" format="color" />
         <attr name="tipsColor" format="color" />
+        <attr name="tipsWidth" format="dimension" />
+        <attr name="tipsHeight" format="dimension" />
     </declare-styleable>
 
 </resources>

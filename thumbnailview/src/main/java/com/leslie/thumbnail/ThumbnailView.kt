@@ -7,7 +7,6 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.graphics.drawable.LayerDrawable
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import com.leslie.thumbnail.util.DisplayUtil
@@ -16,7 +15,7 @@ import com.leslie.thumbnail.util.DisplayUtil
 /**
  * Author by haonan, Date on 2020/11/18.
  * Email:278913810@qq.com
- * PS:
+ * PS: 视频时长选择框
  */
 class ThumbnailView : View {
 
@@ -84,6 +83,8 @@ class ThumbnailView : View {
             tipsBgColor = context.getColor(R.color.thumbnailColor)
             tipsTextColor = context.getColor(R.color.paintTextColor)
             tipsTextSize = resources.getDimension(R.dimen.paintTextSize)
+            mTextBgHeight = resources.getDimension(R.dimen.textRectHeight)
+            mTextBgWidth = resources.getDimension(R.dimen.textRectWidth)
         }
 
         paintStrokeWidth = resources.getDimension(R.dimen.paintStrokeWidth)
@@ -100,8 +101,6 @@ class ThumbnailView : View {
         mTipsBgPaint.color = tipsBgColor
 
         rectWidth = resources.getDimension(R.dimen.scrollBarWidth)
-        mTextBgHeight = resources.getDimension(R.dimen.textRectHeight)//需要根据xml传来
-        mTextBgWidth = resources.getDimension(R.dimen.textRectWidth)//需要根据xml传进来
         mTipsWidth = resources.getDimension(R.dimen.downTipsWidth)
         mTipsHeight = resources.getDimension(R.dimen.downTipsHeight)
 
@@ -128,6 +127,14 @@ class ThumbnailView : View {
         tipsBgColor = typedArray.getColor(
             R.styleable.ThumbnailView_tipsColor,
             context.getColor(R.color.thumbnailColor)
+        )
+        mTextBgWidth = typedArray.getDimension(
+            R.styleable.ThumbnailView_tipsWidth,
+            resources.getDimension(R.dimen.textRectWidth)
+        )
+        mTextBgHeight = typedArray.getDimension(
+            R.styleable.ThumbnailView_tipsHeight,
+            resources.getDimension(R.dimen.textRectHeight)
         )
         typedArray.recycle()
     }
@@ -183,14 +190,25 @@ class ThumbnailView : View {
         onScrollBorderListener = listener
     }
 
+    /**
+     * 获取左边拖动条的数值
+     */
     fun getLeftInterval(): Float {
         return rectF.left
     }
 
+    /**
+     * 获取右边拖动条的数值
+     */
     fun getRightInterval(): Float {
         return rectF2.right
     }
 
+    /**
+     * 设置提示框文字
+     * param: Array<String> 长度为2的String数组，
+     * index[0]:左边文字，index[1]:右边文字
+     */
     fun setTipsText(tipsText: Array<String>?) {
         tipsText?.let {
             this.tipsText = it
@@ -202,7 +220,6 @@ class ThumbnailView : View {
      * 刷新间隔
      */
     private fun refreshInterval(minPx: Float, maxPx: Float) {
-        Log.d("测试", "mwidth=$mWidth")
         this.minPx = when {
             minPx <= 0 -> 0f
             (mWidth != 0f && minPx > mWidth) -> mWidth
@@ -213,8 +230,6 @@ class ThumbnailView : View {
             (mWidth != 0f && maxPx > mWidth) -> mWidth
             else -> maxPx
         }
-        Log.d("测试", "minPx=${this.minPx}")
-        Log.d("测试", "maxPx=${this.maxPx}")
         //刷新左边滑块位置
         rectF.left = 0f
         rectF.top = mTextBgHeight + mTipsHeight
@@ -247,7 +262,6 @@ class ThumbnailView : View {
             }
             initBitmap()
         }
-        Log.d("测试", "onLayout")
     }
 
 
@@ -362,8 +376,6 @@ class ThumbnailView : View {
         rectF5.bottom = rectF.top - mTipsHeight
         rectF5.top = 0f
         canvas.drawBitmap(bitmapTipsBg, null, rectF5, mTipsBgPaint)
-        Log.d("测试","颜色"+mTipsBgPaint.color.toString())
-        Log.d("测试","颜色"+mPaint.color.toString())
         //左边向下箭头
         rectF7.left = (rectF.left - mTextBgWidth / 2) + mTextBgWidth / 2 - mTipsWidth / 2
         rectF7.top = rectF5.bottom
@@ -380,7 +392,7 @@ class ThumbnailView : View {
         canvas.drawText(
             tipsText[0],
             rectF5.left + mTextBgWidth / 2,
-            rectF5.top + tipsTextSize,
+            rectF5.top + mTextBgHeight / 2 + tipsTextSize / 3,
             mTextPaint
         )
 
@@ -407,7 +419,7 @@ class ThumbnailView : View {
         canvas.drawText(
             tipsText[1],
             rectF6.left + mTextBgWidth / 2,
-            rectF6.top + tipsTextSize,
+            rectF6.top + +mTextBgHeight / 2 + tipsTextSize / 3,
             mTextPaint
         )
     }
