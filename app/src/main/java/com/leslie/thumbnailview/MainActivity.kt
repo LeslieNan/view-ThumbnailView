@@ -29,11 +29,5 @@ class MainActivity : AppCompatActivity() {
 
             })
         }
-
-//        val bitmapDownTips = DisplayUtil.vectorToBitmap(
-//            this, com.leslie.thumbnail.R.drawable.bg_drop_down,
-//            DisplayUtil.dp2px(this, 30f), DisplayUtil.dp2px(this, 30f)
-//        )
-//        iv_mian.setImageBitmap(bitmapDownTips)
     }
 }
